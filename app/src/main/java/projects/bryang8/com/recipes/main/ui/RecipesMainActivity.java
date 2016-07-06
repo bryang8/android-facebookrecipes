@@ -1,21 +1,32 @@
 package projects.bryang8.com.recipes.main.ui;
 
+import android.content.Intent;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
+import com.facebook.login.LoginManager;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import projects.bryang8.com.recipes.FacebookRecipesApp;
 import projects.bryang8.com.recipes.R;
+import projects.bryang8.com.recipes.RecipeListActivity;
 import projects.bryang8.com.recipes.entities.Recipe;
+import projects.bryang8.com.recipes.events.RecipeMainEvent;
 import projects.bryang8.com.recipes.lib.base.ImageLoader;
+import projects.bryang8.com.recipes.login.ui.LoginActivity;
 import projects.bryang8.com.recipes.main.RecipeMainPresenter;
 
 public class RecipesMainActivity extends AppCompatActivity implements RecipeMainView{
@@ -46,7 +57,7 @@ public class RecipesMainActivity extends AppCompatActivity implements RecipeMain
         ButterKnife.bind(this);
 
         setupInjection();
-        //setupImageLoading();
+        setupImageLoading();
         //setupGestureDetection();
 
         presenter.onCreate();
@@ -59,9 +70,58 @@ public class RecipesMainActivity extends AppCompatActivity implements RecipeMain
         super.onDestroy();
     }
 
-    private void setupInjection() {
-        FacebookRecipesApp app = (FacebookRecipesApp)getApplication();
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_recipes_main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_list) {
+            navigateToListScreen();
+            return true;
+        } else if (id == R.id.action_logout) {
+            logout();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void logout() {
+        LoginManager.getInstance().logOut();
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                | Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+    }
+
+    private void navigateToListScreen() {
+        startActivity(new Intent(this, RecipeListActivity.class));
+    }
+
+    private void setupInjection() {
+    }
+
+    private void setupImageLoading() {
+        imageLoader.setOnFinishedImageLoadingListener(new RequestListener<String, GlideDrawable>() {
+            @Override
+            public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                Snackbar.make(container, e.getMessage(), Snackbar.LENGTH_SHORT).show();
+                return false;
+            }
+
+            @Override
+            public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                hideProgress();
+                showUIElements();
+                return false;
+            }
+        });
     }
 
     @Override

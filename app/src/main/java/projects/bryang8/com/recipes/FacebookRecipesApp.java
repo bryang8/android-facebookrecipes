@@ -11,6 +11,12 @@ import projects.bryang8.com.recipes.main.di.RecipeMainComponent;
 import projects.bryang8.com.recipes.main.di.RecipeMainModule;
 import projects.bryang8.com.recipes.main.ui.RecipeMainView;
 import projects.bryang8.com.recipes.main.ui.RecipesMainActivity;
+import projects.bryang8.com.recipes.recipeslist.adapters.OnItemClickListener;
+import projects.bryang8.com.recipes.recipeslist.di.DaggerRecipeListComponent;
+import projects.bryang8.com.recipes.recipeslist.di.RecipeListComponent;
+import projects.bryang8.com.recipes.recipeslist.di.RecipeListModule;
+import projects.bryang8.com.recipes.recipeslist.ui.RecipeListActivity;
+import projects.bryang8.com.recipes.recipeslist.ui.RecipeListView;
 
 /**
  * Created by bryan_g8 on 5/07/16.
@@ -47,5 +53,13 @@ public class FacebookRecipesApp extends Application {
               .libsModule(new LibsModule(activity))
               .recipeMainModule(new RecipeMainModule(view))
               .build();
+    }
+
+    public RecipeListComponent getRecipeListComponent(RecipeListActivity activity, RecipeListView view, OnItemClickListener listener){
+        return DaggerRecipeListComponent
+                .builder()
+                .libsModule(new LibsModule(activity))
+                .recipeListModule(new RecipeListModule(view, listener))
+                .build();
     }
 }
